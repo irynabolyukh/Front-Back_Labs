@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Students Records</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="./css/bootstrap.min.css">
+    <link href="/assets/style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Students Records</h1>
+    <table class="table table-striped table-hover table-bordered">
+        <thead class="thead-dark">
+        <tr>
+            <th>Name</th>
+            <th>Programming</th>
+            <th>Math</th>
+            <th>PE</th>
+            <th>English</th>
+            <th>Average</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% for(let student of students) { %>
+            <tr>
+                <th class="table-info font-italic"><%= student.NameStudent %></th>
+                <td><%= student.Programming %></td>
+                <td><%= student.MathGrade %></td>
+                <td><%= student.PEGrade %></td>
+                <td><%= student.EnglishGrade %></td>
+                <td class="table-info"><%= Math.round((parseInt(student.MathGrade)+parseInt(student.EnglishGrade)+parseInt(student.Programming))/3) %></td>
+            </tr>
+        <% } %>
+        </tbody>
+    </table>
+
+    <div class="buttons-wrapper">
+        <a class="btn btn-info" href="./asc">За зростанням</a>
+        <a class="btn btn-info" href="./desc">За спаданням</a>
+    </div>
+</div>
+</body>
+<html>
