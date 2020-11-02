@@ -30,7 +30,7 @@
                 <td><%= student.MathGrade %></td>
                 <td><%= student.PEGrade %></td>
                 <td><%= student.EnglishGrade %></td>
-                <td class="table-info"><%= Math.round((parseInt(student.MathGrade)+parseInt(student.EnglishGrade)+parseInt(student.Programming))/3) %></td>
+                <td class="table-info"><%= student.averageGrade() %></td>
             </tr>
         <% } %>
         </tbody>

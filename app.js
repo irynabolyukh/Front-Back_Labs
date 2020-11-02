@@ -5,6 +5,13 @@ let bodyParser = require('body-parser');
 let cors = require('cors');
 let path = require('path');
 
+class Student{
+
+    averageGrade(){
+        return (Number(this.Programming) + Number(this.MathGrade) + Number(this.PEGrade) + Number(this.EnglishGrade)) / 4;
+    }
+}
+
 let students = [];
 
 const converter=csv()
@@ -12,20 +19,20 @@ const converter=csv()
     .then((json)=>{
         let s;
         json.forEach((row)=>{
-            s={}; // New Student, Array Object
+            s = new Student(); // New Student
             Object.assign(s,row);// Assign json to the new Student Object
-            students.push(s);// Add Json Object to the Array
+            students.push(s);// Add Student Object to the Array
         });
+        console.log(students);
     });
 
 function studentSorterDesc(a, b) {
-    return (Number(b.MathGrade)+Number(b.EnglishGrade)+Number(b.PEGrade)+Number(b.Programming))/4 - (Number(a.MathGrade)+Number(a.EnglishGrade)+Number(a.PEGrade)+Number(a.Programming))/4;
+    return b.averageGrade() - a.averageGrade();
 }
 
-function studentSorterAsc(b, a) {
-    return studentSorterDesc(a,b);
+function studentSorterAsc(a, b) {
+    return a.averageGrade() - b.averageGrade();
 }
-
 
 let app = express();
 
