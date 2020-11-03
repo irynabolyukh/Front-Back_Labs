@@ -1,74 +1,51 @@
-const http = require("http");
-const csv = require("csvtojson");
-let express = require('express');
-let bodyParser = require('body-parser');
-let cors = require('cors');
-let path = require('path');
+const express = require('express');
+const app = express();
+const morgan = require('morgan'); //logging tool for HTTP servers
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const path = require('path');
 
-class Student{
+const mailerRoutes = require('./api/routes/mailers');
 
-    averageGrade(){
-        return (Number(this.Programming) + Number(this.MathGrade) + Number(this.PEGrade) + Number(this.EnglishGrade)) / 4;
-    }
-}
+mongoose.connect('mongodb+srv://node-mailer:' + process.env.MONGO_ATLAS_PW + '@node-rest-mailer.p4zyl.mongodb.net/' + process.env.MONGO_ATLAS_NM + '?retryWrites=true&w=majority',
+    { useNewUrlParser: true,
+        useUnifiedTopology: true }
+);
 
-let students = [];
-
-const converter=csv()
-    .fromFile('./students.csv')
-    .then((json)=>{
-        let s;
-        json.forEach((row)=>{
-            s = new Student(); // New Student
-            Object.assign(s,row);// Assign json to the new Student Object
-            students.push(s);// Add Student Object to the Array
-        });
-        console.log(students);
-    });
-
-function studentSorterDesc(a, b) {
-    return b.averageGrade() - a.averageGrade();
-}
-
-function studentSorterAsc(a, b) {
-    return a.averageGrade() - b.averageGrade();
-}
-
-let app = express();
-
+app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use('/css', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
-
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
 
 
-app.get('/', function (request, response){
-    response.render('index', {
-        title: "Students Info",
-        students : students
-    });
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if(req.method === 'OPTIONS'){
+        res.header('Access-Control-Allow-Methods', 'GET, PUT, POST, PATCH, DELETE');
+        return res.status(200).json({});
+    }
+    next();
 });
 
-app.get('/desc', (request, response)=>{
-    response.render('index', {
-        title: "Students Info",
-        students : students.sort(studentSorterDesc)
-    });
+app.use('/mailers', mailerRoutes);
+
+app.use((req, res, next) => {
+    const error = new Error('Not found');
+    error.status = 404;
+    next(error);
 });
 
-app.get('/asc', function (request, response){
-    response.render('index', {
-        title: "Students Info",
-        students : students.sort(studentSorterAsc)
-    });
+app.use((error, req, res, next) => {
+    res.status(error.status || 500);
+    res.json({
+        error: {
+            message: error.message
+        }
+    })
 });
 
-const server = http.createServer(app);
-
-server.listen(3000, function (){
-    console.log("Listening to 3000");
-});
-
+module.exports = app;
